@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calculadora de tamaño de muestra</title>
+<style>
+:root{--navy:#12324A;--teal:#1B998B;--light:#F2F6F8;--ink:#1F2D3A;--mut:#5B6B79;--amber:#E8A33D;--line:#D5DEE4}
+*{box-sizing:border-box}body{margin:0;font-family:Calibri,Segoe UI,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.45}
+header{background:var(--navy);color:#fff;padding:22px 20px}header h1{margin:0;font-family:Cambria,Georgia,serif;font-size:26px}header p{margin:6px 0 0;color:#BFE3DF;font-size:14px}
+main{max-width:980px;margin:0 auto;padding:18px 16px 40px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tab{border:1px solid var(--line);background:#fff;color:var(--navy);padding:9px 13px;border-radius:999px;cursor:pointer;font-size:14px;font-family:inherit}
+.tab[aria-selected=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--light);border-radius:12px;padding:18px}
+h2{font-family:Cambria,Georgia,serif;font-size:20px;color:var(--navy);margin:0 0 4px}
+.sub{color:var(--mut);font-size:14px;margin:0 0 14px}
+label{display:block;font-size:14px;font-weight:600;margin:12px 0 3px;color:var(--navy)}
+.hint{font-weight:400;color:var(--mut);font-size:12.5px;display:block}
+input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:inherit;background:#fff}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.formula{font-family:Cambria,Georgia,serif;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0;font-size:15px;color:var(--navy)}
+.big{background:var(--navy);color:#fff;border-radius:12px;padding:18px;margin-bottom:14px}
+.big .k{font-size:13px;color:var(--amber);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.big .v{font-family:Cambria,Georgia,serif;font-size:44px;line-height:1.1;margin:2px 0}
+.big .s{font-size:14px;color:#BFE3DF}
+.steps{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:14.5px}
+.steps div{margin:3px 0}.steps b{color:var(--navy)}
+.warn{background:#FFF4E0;border:1px solid #F2D08E;border-radius:8px;padding:9px 11px;font-size:13.5px;margin-top:10px;color:#6A4A0A}
+.err{background:#FBE9E9;border:1px solid #E5B4B4;color:#7A2A2A;border-radius:8px;padding:9px 11px;font-size:13.5px}
+button.copy{margin-top:12px;background:var(--teal);color:#fff;border:0;padding:9px 14px;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit}
+.methods{margin-top:12px;font-size:13.5px;background:#fff;border:1px dashed var(--line);border-radius:8px;padding:10px 12px;color:var(--ink)}
+.foot{color:var(--mut);font-size:12.5px;margin-top:22px}
+.common{margin-top:16px;padding-top:6px;border-top:1px solid var(--line)}
+</style></head><body>
+<header><h1>Calculadora de tamaño de muestra</h1><p>Elige el tipo de desenlace, ingresa los parámetros de tu artículo y obtén el n con el cálculo paso a paso.</p></header>
+<main>
+<div class="tabs" role="tablist" id="tabs"></div>
+<div class="grid">
+  <section class="panel"><h2 id="ttl"></h2><p class="sub" id="sub"></p><div class="formula" id="fml"></div><div id="inputs"></div>
+    <div class="common"><div class="row"><div><label>Datos perdidos o faltantes (%)<span class="hint">Se suele usar 10 %</span></label><input id="loss" type="number" value="10" min="0" max="50" step="1"></div>
+    <div><label>Población disponible N (opcional)<span class="hint">Si es pequeña (censo)</span></label><input id="pop" type="number" min="1" placeholder="vacío = ilimitada"></div></div></div>
+  </section>
+  <section><div id="out"></div></section>
+</div>
+<p class="foot">Herramienta de apoyo docente. Los parámetros (proporciones, medias, sensibilidad, OR, prevalencia) deben sustentarse con un artículo o un estudio piloto; si se inventan, el n no es defendible. Fórmulas estándar: Fleiss, Buderer, Fisher z, Hanley-McNeil, regla de 10 eventos por variable.</p>
+</main>
+<script>
+// ---- normal inverse (Acklam)
+function qn(p){const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];let q,r;if(p<0.02425){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}if(p>1-0.02425){q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+const Zc=(conf,two)=>qn(two?1-(1-conf/100)/2:conf/100); const Zp=pw=>qn(pw/100);
+const f=(x,d=2)=>Number(x).toLocaleString('es-PE',{maximumFractionDigits:d,minimumFractionDigits:0});
+const up=x=>Math.ceil(x-1e-9);
+function hm(A,n1,n2){const Q1=A/(2-A),Q2=2*A*A/(1+A);return(A*(1-A)+(n1-1)*(Q1-A*A)+(n2-1)*(Q2-A*A))/(n1*n2)}
+// ---- common fields
+const fAlpha={id:'conf',label:'Confianza (%)',val:95,min:50,max:99.9,step:0.5};
+const fPower={id:'pw',label:'Poder (%)',val:80,min:50,max:99.9,step:1};
+const fSide={id:'side',label:'Tipo de prueba',type:'select',opts:[['2','Bilateral'],['1','Unilateral (la hipótesis ya tiene dirección)']]};
+const TYPES=[
+{k:'prop',tab:'Una proporción',title:'Una proporción (prevalencia o frecuencia)',sub:'Para estimar una frecuencia con una precisión deseada.',fml:'n = Z² · p · (1 − p) / d²',
+ fields:[{id:'p',label:'Proporción esperada p (0–1)',hint:'Si no la conoces: 0,5 (máximo n)',val:0.5,min:0.001,max:0.999,step:0.01},{id:'d',label:'Precisión d (±, 0–1)',hint:'Ej.: 0,05 = ±5 %',val:0.05,min:0.005,max:0.5,step:0.005},fAlpha],
+ calc(v){const Z=Zc(v.conf,true);const n=Z*Z*v.p*(1-v.p)/(v.d*v.d);return{n,steps:[`Z = ${f(Z,3)}`,`n = ${f(Z,3)}² × ${f(v.p)} × ${f(1-v.p)} / ${f(v.d,3)}² = <b>${f(n,1)}</b>`],methods:`Se calculó el tamaño de muestra para estimar una proporción esperada de ${f(v.p*100,1)} % con una precisión de ±${f(v.d*100,1)} % y confianza de ${v.conf} %.`}}},
+{k:'dx',tab:'Prueba diagnóstica',title:'Sensibilidad y especificidad (Buderer)',sub:'Se calculan ambas y se toma la mayor. Se divide entre la prevalencia.',fml:'n(Sn) = [Z²·Sn(1−Sn)/d²] ÷ prevalencia<br>n(Sp) = [Z²·Sp(1−Sp)/d²] ÷ (1 − prevalencia)',
+ fields:[{id:'sn',label:'Sensibilidad esperada (0–1)',val:0.9,min:0.05,max:0.999,step:0.01},{id:'dsn',label:'Precisión de Sn (±)',hint:'Ej.: 0,08–0,10',val:0.08,min:0.01,max:0.3,step:0.01},{id:'sp',label:'Especificidad esperada (0–1)',val:0.8,min:0.05,max:0.999,step:0.01},{id:'dsp',label:'Precisión de Sp (±)',val:0.1,min:0.01,max:0.3,step:0.01},{id:'prev',label:'Prevalencia de la enfermedad en tu muestra (0–1)',hint:'Si solo incluyes operados/confirmados sube mucho',val:0.5,min:0.02,max:0.98,step:0.01},fAlpha],
+ calc(v){const Z=Zc(v.conf,true);const a=Z*Z*v.sn*(1-v.sn)/(v.dsn**2),b=Z*Z*v.sp*(1-v.sp)/(v.dsp**2);const A=a/v.prev,B=b/(1-v.prev);const n=Math.max(A,B);return{n,steps:[`Z = ${f(Z,3)}`,`n(Sn) = ${f(a,1)} ÷ ${f(v.prev)} = <b>${f(A,1)}</b>`,`n(Sp) = ${f(b,1)} ÷ ${f(1-v.prev)} = <b>${f(B,1)}</b>`,`Se toma el mayor: <b>${f(n,1)}</b> (${A>=B?'manda la sensibilidad':'manda la especificidad'})`],methods:`El tamaño de muestra se calculó con el método de Buderer para sensibilidad (${f(v.sn*100,0)} %, precisión ±${f(v.dsn*100,0)} %) y especificidad (${f(v.sp*100,0)} %, precisión ±${f(v.dsp*100,0)} %), prevalencia ${f(v.prev*100,0)} % y confianza ${v.conf} %.`}}},
+{k:'p2',tab:'Dos proporciones',title:'Comparar dos proporciones',sub:'Cohortes y transversales analíticos con desenlace sí/no.',fml:'n₁ = [Zα·√((1+1/r)·p̄q̄) + Zβ·√(p₁q₁ + p₂q₂/r)]² / (p₁−p₂)²',
+ fields:[{id:'p1',label:'p₁: proporción en el grupo 1 (0–1)',hint:'Ej.: expuestos, o el grupo que esperas con más eventos',val:0.5,min:0.001,max:0.999,step:0.01},{id:'p2',label:'p₂: proporción en el grupo 2 (0–1)',val:0.2,min:0.001,max:0.999,step:0.01},{id:'r',label:'Razón r = n₂ / n₁',hint:'1 = grupos iguales; 3 = el grupo 2 es el triple',val:1,min:0.1,max:10,step:0.1},fAlpha,fPower,fSide],
+ calc(v){if(v.p1===v.p2)return{err:'p₁ y p₂ no pueden ser iguales.'};const Za=Zc(v.conf,v.side==2),Zb=Zp(v.pw);const pb=(v.p1+v.r*v.p2)/(1+v.r);const n1=(Za*Math.sqrt((1+1/v.r)*pb*(1-pb))+Zb*Math.sqrt(v.p1*(1-v.p1)+v.p2*(1-v.p2)/v.r))**2/(v.p1-v.p2)**2;const n2=n1*v.r;return{n:up(n1)+up(n2),parts:[['Grupo 1',up(n1)],['Grupo 2',up(n2)]],steps:[`Zα = ${f(Za,3)}  ·  Zβ = ${f(Zb,3)}`,`p̄ = (${f(v.p1)} + ${f(v.r)}×${f(v.p2)}) / ${f(1+v.r)} = ${f(pb,3)}`,`n₁ = <b>${f(n1,1)}</b> → ${up(n1)}   ·   n₂ = ${f(v.r)} × n₁ = <b>${f(n2,1)}</b> → ${up(n2)}`],methods:`El tamaño de muestra se calculó para comparar dos proporciones (${f(v.p1*100,0)} % vs ${f(v.p2*100,0)} %), razón ${f(v.r)}:1, confianza ${v.conf} %, poder ${v.pw} %, prueba ${v.side==2?'bilateral':'unilateral'}.`}}},
+{k:'m2',tab:'Dos medias',title:'Comparar dos medias',sub:'Desenlace numérico entre dos grupos.',fml:'n por grupo = 2 · (Zα + Zβ)² · σ² / Δ²',
+ fields:[{id:'dl',label:'Diferencia mínima a detectar Δ',hint:'En las unidades de la variable (ej.: mg/dL)',val:20,min:0.0001,step:0.5},{id:'sd',label:'Desviación estándar σ',hint:'De un artículo comparable',val:50,min:0.0001,step:0.5},{id:'rr',label:'Razón r = n₂ / n₁',val:1,min:0.1,max:10,step:0.1},fAlpha,fPower,fSide],
+ calc(v){const Za=Zc(v.conf,v.side==2),Zb=Zp(v.pw);const n1=(1+1/v.rr)*((Za+Zb)*v.sd/v.dl)**2;const n2=n1*v.rr;return{n:up(n1)+up(n2),parts:[['Grupo 1',up(n1)],['Grupo 2',up(n2)]],steps:[`Zα = ${f(Za,3)}  ·  Zβ = ${f(Zb,3)}  ·  d = Δ/σ = ${f(v.dl/v.sd,3)}`,`n₁ = (1 + 1/r) × ((Zα+Zβ)·σ/Δ)² = <b>${f(n1,1)}</b> → ${up(n1)}`,`n₂ = r × n₁ = ${up(n2)}`],methods:`El tamaño de muestra se calculó para detectar una diferencia de medias de ${f(v.dl)} con desviación estándar ${f(v.sd)}, confianza ${v.conf} %, poder ${v.pw} %, prueba ${v.side==2?'bilateral':'unilateral'}.`}}},
+{k:'cor',tab:'Correlación',title:'Correlación entre dos variables numéricas',sub:'Pearson o Spearman (aproximación de Fisher).',fml:'n = [(Zα + Zβ) / C]² + 3,   C = ½ · ln[(1+r)/(1−r)]',
+ fields:[{id:'r',label:'Correlación esperada r (0–1)',hint:'0,2 pequeña · 0,3 moderada · 0,5 grande',val:0.25,min:0.05,max:0.95,step:0.01},fAlpha,fPower,fSide],
+ calc(v){const Za=Zc(v.conf,v.side==2),Zb=Zp(v.pw);const C=0.5*Math.log((1+v.r)/(1-v.r));const n=((Za+Zb)/C)**2+3;return{n,steps:[`Zα = ${f(Za,3)}  ·  Zβ = ${f(Zb,3)}`,`C = ½ ln((1+${f(v.r)})/(1−${f(v.r)})) = ${f(C,4)}`,`n = ((${f(Za+Zb,3)})/${f(C,4)})² + 3 = <b>${f(n,1)}</b>`],methods:`El tamaño de muestra se calculó para detectar una correlación de r = ${f(v.r)} (transformación de Fisher), confianza ${v.conf} %, poder ${v.pw} %, prueba ${v.side==2?'bilateral':'unilateral'}.`}}},
+{k:'cc',tab:'Casos y controles',title:'Casos y controles (OR)',sub:'Asociación factor–enfermedad partiendo de los casos.',fml:'p₁ = OR·p₀ / [1 + p₀(OR−1)]  →  dos proporciones con r = controles por caso',
+ fields:[{id:'p0',label:'p₀: proporción de expuestos en los controles (0–1)',val:0.15,min:0.001,max:0.95,step:0.01},{id:'or',label:'OR que quieres detectar',hint:'De un artículo; con OR más cercano a 1 el n crece mucho',val:3,min:1.05,step:0.1},{id:'m',label:'Controles por caso',val:2,min:1,max:5,step:1},fAlpha,fPower],
+ calc(v){const p1=v.or*v.p0/(1+v.p0*(v.or-1));const Za=Zc(v.conf,true),Zb=Zp(v.pw);const pb=(p1+v.m*v.p0)/(1+v.m);const nc=(Za*Math.sqrt((1+1/v.m)*pb*(1-pb))+Zb*Math.sqrt(p1*(1-p1)+v.p0*(1-v.p0)/v.m))**2/(p1-v.p0)**2;return{n:up(nc)*(1+v.m),parts:[['Casos',up(nc)],['Controles',up(nc*v.m)]],steps:[`p₁ = ${f(v.or)}×${f(v.p0)} / (1 + ${f(v.p0)}×${f(v.or-1)}) = ${f(p1,3)}`,`p̄ = ${f(pb,3)}  ·  Zα = ${f(Za,3)}  ·  Zβ = ${f(Zb,3)}`,`Casos = <b>${f(nc,1)}</b> → ${up(nc)};  controles = ${v.m} × casos = ${up(nc*v.m)}`],methods:`El tamaño de muestra se calculó para un estudio de casos y controles con ${v.m} controles por caso, exposición esperada en controles de ${f(v.p0*100,0)} %, OR a detectar de ${f(v.or)}, confianza ${v.conf} % y poder ${v.pw} %.`,warn:'Si el diseño es emparejado, el análisis es regresión logística condicional y el n puede variar con la correlación de exposición dentro de los pares (Dupont). Si ya tienes más casos que el n calculado, no necesitas más.'}}},
+{k:'auc',tab:'Curva ROC (AUC)',title:'AUC con intervalo de confianza (Hanley-McNeil)',sub:'Capacidad discriminativa o pronóstica de una prueba o escala.',fml:'EE(AUC)² = [A(1−A) + (n₁−1)(Q₁−A²) + (n₂−1)(Q₂−A²)] / (n₁n₂)',
+ fields:[{id:'A',label:'AUC esperada',hint:'De un artículo; > 0,5',val:0.75,min:0.55,max:0.99,step:0.01},{id:'prev',label:'Prevalencia del evento (0–1)',hint:'Proporción con la enfermedad o el evento',val:0.3,min:0.02,max:0.98,step:0.01},{id:'hw',label:'Amplitud deseada del IC (±)',hint:'Ej.: 0,10–0,15 en tesis',val:0.12,min:0.02,max:0.3,step:0.01},fAlpha],
+ calc(v){const Z=Zc(v.conf,true);const k=(1-v.prev)/v.prev;let n1=0;for(let i=5;i<5000;i++){const n2=i*k;if(Z*Math.sqrt(hm(v.A,i,n2))<=v.hw){n1=i;break}}if(!n1)return{err:'No se alcanza con estos valores; aumenta la amplitud.'};const n2=Math.ceil(n1*k-1e-9);return{n:n1+n2,parts:[['Con el evento',n1],['Sin el evento',n2]],steps:[`Se busca n con que ${f(Z,2)} × EE ≤ ${f(v.hw,2)}, con razón sin evento/con evento = ${f(k,2)}`,`Con evento = <b>${n1}</b>;  sin evento = <b>${n2}</b>`],methods:`El tamaño de muestra se calculó con el método de Hanley-McNeil para estimar un AUC esperado de ${f(v.A)} con IC ${v.conf} % de ±${f(v.hw)} y prevalencia del evento de ${f(v.prev*100,0)} %.`,warn:'Este cálculo da precisión para el AUC, no poder para comparar dos AUC. Para comparar dos curvas (DeLong) se necesita una diferencia esperada y la correlación entre ellas: usa R (pROC) o MedCalc.'}}},
+{k:'epv',tab:'Regresión (EPV)',title:'Regresión multivariable: 10 eventos por variable',sub:'Límite práctico para el número de variables del modelo.',fml:'n = (EPV × n.º de variables) / proporción del evento',
+ fields:[{id:'k',label:'Número de variables en el modelo',hint:'Cada categoría de una variable nominal cuenta',val:4,min:1,step:1},{id:'epv',label:'Eventos por variable',val:10,min:5,max:20,step:1},{id:'pe',label:'Proporción del evento (0–1)',hint:'Del desenlace menos frecuente',val:0.3,min:0.02,max:0.98,step:0.01}],
+ calc(v){const ev=v.k*v.epv;const n=ev/v.pe;return{n,steps:[`Eventos necesarios = ${v.k} × ${v.epv} = <b>${ev}</b>`,`n = ${ev} / ${f(v.pe)} = <b>${f(n,1)}</b>`,`Con ${Math.max(v.k-2,1)} variables bastarían ${up(Math.max(v.k-2,1)*v.epv/v.pe)} pacientes`],methods:`Para el modelo multivariable se consideraron ${v.epv} eventos por variable independiente (${v.k} variables), con una frecuencia esperada del evento de ${f(v.pe*100,0)} %.`}}}
+];
+let cur=0;const tabs=document.getElementById('tabs');
+TYPES.forEach((t,i)=>{const b=document.createElement('button');b.className='tab';b.textContent=t.tab;b.setAttribute('role','tab');b.onclick=()=>{cur=i;draw()};tabs.appendChild(b)});
+function draw(){[...tabs.children].forEach((b,i)=>b.setAttribute('aria-selected',i===cur));const t=TYPES[cur];
+ ttl.textContent=t.title;sub.textContent=t.sub;fml.innerHTML=t.fml;
+ inputs.innerHTML=t.fields.map(x=>x.type==='select'?`<label>${x.label}</label><select id="f_${x.id}">${x.opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')}</select>`:`<label>${x.label}${x.hint?`<span class="hint">${x.hint}</span>`:''}</label><input id="f_${x.id}" type="number" value="${x.val}" ${x.min!=null?`min="${x.min}"`:''} ${x.max!=null?`max="${x.max}"`:''} step="${x.step||'any'}">`).join('');
+ inputs.querySelectorAll('input,select').forEach(e=>e.oninput=run);run()}
+function run(){const t=TYPES[cur];const v={};for(const x of t.fields){const e=document.getElementById('f_'+x.id);v[x.id]=x.type==='select'?e.value:parseFloat(String(e.value).replace(',','.'))}
+ const bad=t.fields.find(x=>x.type!=='select'&&(!isFinite(v[x.id])||(x.min!=null&&v[x.id]<x.min)||(x.max!=null&&v[x.id]>x.max)));
+ if(bad){out.innerHTML=`<div class="err">Revisa «${bad.label}»: valor fuera de rango.</div>`;return}
+ const loss=Math.min(Math.max(parseFloat(document.getElementById('loss').value)||0,0),50),N=parseFloat(document.getElementById('pop').value);
+ const r=t.calc(v);if(r.err){out.innerHTML=`<div class="err">${r.err}</div>`;return}
+ let n=r.n,note='',nn=up(n);
+ if(N>0&&isFinite(N)){const adj=up(n/(1+n/N));note=`Con población finita N = ${f(N,0)}: ${nn} → <b>${adj}</b>`;nn=adj}
+ const fin=up(nn/(1-loss/100));
+ const parts=r.parts?`<div class="s">${r.parts.map(p=>p[0]+': '+p[1]).join(' · ')}</div>`:'';
+ const text=`${r.methods} El tamaño de muestra calculado fue de ${nn} participantes${loss?`; considerando ${loss} % de datos faltantes, la muestra final fue de ${fin}`:''}.`;
+ out.innerHTML=`<div class="big"><div class="k">Tamaño de muestra final</div><div class="v">${fin}</div><div class="s">n calculado: ${nn}${loss?` · +${loss} % de pérdidas`:''}${N>0?' · con población finita':''}</div>${parts}</div>
+ <div class="steps"><b>Cálculo paso a paso</b>${r.steps.map(s=>`<div>${s}</div>`).join('')}${note?`<div>${note}</div>`:''}${loss?`<div>n final = ${nn} / (1 − ${f(loss/100)}) = <b>${fin}</b></div>`:''}</div>
+ ${r.warn?`<div class="warn">${r.warn}</div>`:''}
+ <div class="methods" id="mt"><b>Texto para el proyecto:</b><br>${text}</div><button class="copy" id="cp">Copiar texto</button>`;
+ document.getElementById('cp').onclick=async e=>{try{await navigator.clipboard.writeText(text);e.target.textContent='¡Copiado!'}catch(_){const r=document.createRange();r.selectNodeContents(document.getElementById('mt'));const s=getSelection();s.removeAllRanges();s.addRange(r);e.target.textContent='Texto seleccionado: cópialo con Ctrl+C'}}}
+document.getElementById('loss').oninput=run;document.getElementById('pop').oninput=run;draw();
+</script></body></html>
